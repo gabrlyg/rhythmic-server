@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <title>Add Track</title>
+  </head>
+  <body>
+    <script>
+      function submit() {
+        var name = document.getElementById('name').value;
+        var artists = document.getElementById('artists').value.split(',');
+        var album = document.getElementById('album').value.split(';');
+        var image = document.getElementById('image').value;
+        var track_number = document.getElementById('track_number').value;
+        var genres = document.getElementById('genres').value.split(',');
+        var uri = document.getElementById('uri').value;
+        var lyrics = document.getElementById('lyrics').value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState === 4) {
+            if (this.status === 201) {
+              aleart('Created');
+            } else {
+              alert('Failed');
+            }
+            console.log(this.response);
+          }
+        }
+        xhttp.open('POST', '/admin/track', true);
+        xhttp.setRequestHeader('Content-Type', 'application/json');
+        xhttp.send(JSON.stringify({
+          name: name,
+          artists: artists,
+          album: {
+            id: album[0],
+            name: album[1],
+          },
+          image: image,
+          track_number: track_number,
+          genres: genres,
+          uri: uri,
+          lyrics: lyrics,
+        }));
+      }  
+    </script>
+    name:<br><input id='name' type='text' />
+    artists:<br><input id='artists' type='text' />
+    album:<br><input id='album', type='text' />
+    image:<br><input id='image' type='text' />
+    track_number:<br><input id='track_number' type='text' />
+    genres:<br><input id='genres' type='text' />
+    uri:<br><input id='uri' type='text' />
+    lyrics<br><input id='lyrics' type='text' />
+    <button type="Button" onclick="submit()">Submit</button>
+  </body>
+</html>

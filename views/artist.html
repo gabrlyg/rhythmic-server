@@ -1,0 +1,41 @@
+<html>
+  <head>
+    <title>Add Artist</title>
+  </head>
+  <body>
+    <script>
+      function submit() {
+        var name = document.getElementById('name').value;
+        var image = document.getElementById('image').value;
+        var bio = document.getElementById('bio').value;
+        var genres = document.getElementById('genres').value.split(',');
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState === 4) {
+            if (this.status === 201) {
+              alert('Created');
+              console.log(this.response);
+              // window.location = '/admin/artist';
+            } else {
+              alert('Failed');
+              // window.location = '/admin/artist';
+            }
+          }
+        }
+        xhttp.open('POST', '/admin/artist', true);
+        xhttp.setRequestHeader('Content-Type', 'application/json');
+        xhttp.send(JSON.stringify({
+          name: name,
+          image: image,
+          bio: bio,
+          genres: genres,
+        }));
+      }
+    </script>
+    Name:<br><input id='name' /><br>
+    image:<br><input id='image' /><br>
+    bio:<br><input id='bio' /><br>
+    genres:<br><input id='genres' /><br>
+    <button type='Button' onclick='submit()'>Submit</button>
+  </body>
+</html>

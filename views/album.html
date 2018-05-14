@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>Add Album</title>
+  </head>
+  <body>
+    <script>
+      function submit() {
+        var name = document.getElementById('name').value;
+        var artists = document.getElementById('artists').value.split(',');
+        var genres = document.getElementById('genres').value.split(',');
+        var image = document.getElementById('image').value;
+        var release_date = document.getElementById('release_date').value;
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState === 4) {
+            if (this.status === 201) {
+              aleart('Created');
+            } else {
+              alert('Failed');
+            }
+            console.log(this.response);
+          }
+        }
+        xhttp.open('POST', '/admin/album', true);
+        xhttp.setRequestHeader('Content-Type', 'application/json');
+        xhttp.send(JSON.stringify({
+          name: name,
+          artists: artists,
+          genres: genres,
+          image: image,
+          release_date: release_date,
+        }));
+      }  
+    </script>
+    name:<br><input id='name' type='text' />
+    artists:<br><input id='artists' type='text' />
+    genres:<br><input id='genres' type='text' />
+    image:<br><input id='image' type='text' />
+    release_date:<br><input id='release_date' type='text' />
+    <button type="Button" onclick="submit()">Submit</button>
+  </body>
+</html>
