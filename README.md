@@ -1,2 +1,2 @@
-# rhythm-server
-Server side for rhythm
+# rhythmic-server
+Server side for Rhythmic
