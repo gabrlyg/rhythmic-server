@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Track = require('../../../models/Track');
+const dbUri = require('../../index').dbUri;
 
-const dbUri = 'mongodb://music_app:music_application@localhost:27017/music';
 mongoose.connect(dbUri);
 const db = mongoose.connection;
 db.on('connected', console.log.bind(console, 'MongoDB connected'));
@@ -9,15 +9,22 @@ db.on('disconnected', console.log.bind(console, 'MongoDB disconnected'));
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 const linkin_park = {
-  id: '5acc735e660cd335183393e3',
+  id: '5af99eaa6889ed335810dc07',
   name: 'Linkin Park',
 }
 const minutes_to_midnight = {
   album: {
-    id: '5af1033c1ef1861a30417d84',
+    id: '5af9a17e3ca8cf06908177b5',
+    // id: '5af1033c1ef1861a30417d84', // laptop
     name: 'Minutes To Midnight',
   },
-  genres: linkin_park.genres,
+  genres: [
+    'Alternative rock',
+    'Nu metal',
+    'Alternative metal',
+    'Rap rock',
+    'Electronic rock'
+  ],
   image: '/images/albums/minutes_to_midnight_linkin_park.jpg',
 }
 const tracks = [{
@@ -130,12 +137,22 @@ const tracks = [{
   lyrics: '/lyrics/linkin_park/minutes_to_midnight/the_little_things_give_you_away.lrc',
 }];
 
+let cnt = 0;
+const count = () => {
+  cnt++;
+  if (cnt === tracks.length) {
+    console.log('Finished!');
+  }
+}
+
 for (let item of tracks) {
   Track.create(item).then(result => {
     if (result) {
       console.log('Success: ' + item.name);
+      count();
     }
   }).catch(err => {
     console.error('Failed: ' + item.name);
+    count();
   });
 }

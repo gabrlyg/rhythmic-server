@@ -1,24 +1,24 @@
 const Track = require('../models/Track');
 
-exports.get = (req, res) => {
+exports.get = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json({
-      error: 'Bad Request',
-    });
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     Track.readOneById(id).then(track => {
       if (!track) {
-        res.status(404).json({
-          error: 'Track not found',
-        });
+        let err = new Error('Track not found');
+        err.status = 404;
+        next(err);
       } else {
         res.status(200).json(track);
       }
     }).catch(err => {
-      res.status(500).json({
-        error: 'Internal Server Error',
-      });
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
       console.error(err);
     });
   }

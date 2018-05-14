@@ -50,13 +50,13 @@ const userInfo = {
 //   console.log(uTracks);
 // });
 
-// User.addToArtists('5a9e43beff350b33e83b9234', '5acc735e660cd335183393e3').then(user => {
+// User.addToArtists('5a9e43beff350b33e83b9234', '5af99eaa6889ed335810dc07').then(user => {
 //   console.log(user);
 //   return Artist.readManyById(user.artists);
 // }).then(artists => {
 //   console.log(artists);
 // });
 
-// User.deleteFromArtists('5a9e43beff350b33e83b9234', '5acc735e660cd335183393e3').then(u => {
+// User.deleteFromArtists('5a9e43beff350b33e83b9234', '5af99eaa6889ed335810dc07').then(u => {
 //   console.log(u);
 // })

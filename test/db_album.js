@@ -11,7 +11,7 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 const undergroundSix = {
   name: 'LP Underground 6',
   artists: [{
-    id: '5acc735e660cd335183393e3',
+    id: '5af99eaa6889ed335810dc07',
     name: 'Linkin Park',
   }],
   genres: ['Alternative rock', 'Nu metal', 'Alternative metal', 'Rap rock', 'Electronic rock'],

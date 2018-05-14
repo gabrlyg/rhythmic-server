@@ -1,6 +1,5 @@
 var express = require('express');
 var path = require('path');
-// var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -13,16 +12,12 @@ var app = express();
 
 // Connect to MongoDB
 const mongoose = require('mongoose');
-const dbUri = 'mongodb://music_app:music_application@localhost:27017/music';
+const dbUri = require('./config').dbUri;
 mongoose.connect(dbUri);
 const db = mongoose.connection;
 db.on('connected', console.log.bind(console, 'MongoDB connected'));
 db.on('disconnected', console.log.bind(console, 'MongoDB disconnected'));
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-
-// // view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'html');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -52,13 +47,6 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  // res.locals.message = err.message;
-  // res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  // res.status(err.status || 500);
-  // res.render('error');
   res.status(err.status || 500).json(err);
   console.error(err);
 });

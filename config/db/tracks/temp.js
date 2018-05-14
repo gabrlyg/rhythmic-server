@@ -1,6 +1,6 @@
 const muse = {
   artist: {
-    id: '5af0f7ed98eb702d5cec8db0',
+    id: '5af99eaa6889ed335810dc08',
     name: 'Muse',
   },
   genres: [
@@ -14,7 +14,7 @@ const muse = {
 }
 const green_day = {
   artists: {
-    id: '5af0f7ed98eb702d5cec8db1',
+    id: '5af99eaa6889ed335810dc09',
     name: 'Green Day',
   },
   genres: [
