@@ -2,27 +2,13 @@ const Playlist = require('../models/Playlist');
 const Track = require('../models/Track');
 const auth = require('../lib/auth');
 
-const bad_request = {
-  error: 'Bad Request',
-}
-const not_authorized = {
-  error: 'Not Authorized',
-}
-const token_expired = {
-  error: 'Token Expired',
-}
-const playlist_not_found = {
-  error: 'Playlist not found',
-}
-const internal_server_error = {
-  error: 'Internal Server Error',
-}
-
 // GET /playlist/:id
-exports.get = (req, res) => {
+exports.get = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     const result = {
       owner: '',
@@ -32,7 +18,9 @@ exports.get = (req, res) => {
     }
     Playlist.readById(id).then(playlist => {
       if (!playlist) {
-        res.status(404).json(playlist_not_found);
+        let err = new Error('Playlist not found');
+        err.status = 404;
+        next(err);
       } else {
         result.owner = playlist.owner;
         result.name = playlist.name;
@@ -44,30 +32,40 @@ exports.get = (req, res) => {
         result.items = tracks;
         res.status(200).json(result);
       }
-    }).catch(err => {
-      res.status(500).json(internal_server_error);
-      console.error(err);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.log(error);
     });
   }
 }
 
-exports.create = (req, res) => {
+exports.create = (req, res, next) => {
   if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           const owner = result.user_id;
           const { name, image } = req.body;
           if (!name || !image) {
-            res.status(400).json(bad_request);
+            let err = new Error('Bad Request');
+            err.status = 400;
+            next(err);
           } else {
             return Playlist.create({
               owner: owner,
@@ -80,26 +78,34 @@ exports.create = (req, res) => {
         if (playlist !== undefined) {
           res.status(201).json(playlist);
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.log(error);
       });
     }
   }
 }
 
-exports.delete = (req, res) => {
+exports.delete = (req, res, next) => {
   if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return Playlist.delete(req.params.id);
         }
@@ -109,35 +115,43 @@ exports.delete = (req, res) => {
             message: 'Playlist deleted successfully',
           });
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
-exports.add = (req, res) => {
+exports.add = (req, res, next) => {
   if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return Track.readOneById(req.params.track_id);
         }
       }).then(track => {
         if (track !== undefined) {
           if (!track) {
-            res.status(404).json({
-              error: 'Track not found',
-            });
+            let err = new Error('Track not found');
+            err.status = 404;
+            next(err);
           } else {
             return Playlist.add(req.params.id, req.params.track_id);
           }
@@ -145,45 +159,59 @@ exports.add = (req, res) => {
       }).then(nPlaylist => {
         if (nPlaylist !== undefined) {
           if (!nPlaylist) {
-            res.status(404).json(playlist_not_found);
+            let err = new Error('Playlist not found');
+            err.status = 404;
+            next(err);
           } else {
             res.status(201).json(nPlaylist);
           }
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
-exports.remove = (req, res) => {
+exports.remove = (req, res, next) => {
   if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return Playlist.remove(req.params.id, req.params.track_id);
         }
       }).then(nPlaylist => {
         if (nPlaylist !== undefined) {
           if (!nPlaylist) {
-            res.status(404).json(playlist_not_found);
+            let err = new Error('Playlist not found');
+            err.status = 404;
+            next(err);
           } else {
             res.status(201).json(nPlaylist);
           }
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }

@@ -1,16 +1,18 @@
 const Artist = require('../models/Artist');
 const Album = require('../models/Album');
 
-exports.get = (req, res) => {
+exports.get = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json({
-      error: 'Bad Request'
-    });
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     Artist.readById(id).then(artist => {
       if (!artist) {
-        res.status(404).json({ error: 'Artist not found' });
+        let err = new Error('Artist not found');
+        err.status = 404;
+        next(err);
       } else {
         Album.readByArtist(artist.name).then(albums => {
           if (albums !== undefined) {
@@ -19,11 +21,17 @@ exports.get = (req, res) => {
               albums: albums,
             });
           }
-        }).catch(err => { throw err });
+        }).catch(error => {
+          let err = new Error('Internal Server Error');
+          err.status = 500;
+          next(err);
+        });
       }
-    }).catch(err => {
-      res.status(500).json({ error: 'Internal Server Error' });
-      console.error(err);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.error(error);
     });
   }
 }

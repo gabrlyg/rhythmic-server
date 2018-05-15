@@ -6,11 +6,11 @@ const internal_server_error = {
   error: 'Internal Server Error',
 }
 
-exports.get = (req, res) => {
+exports.get = (req, res, next) => {
   if (!req.query.keywords) {
-    res.status(400).json({
-      error: 'Bad Request',
-    });
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     const keywords = new RegExp(keywords);
     switch (req.query.categories) {
@@ -19,9 +19,11 @@ exports.get = (req, res) => {
           res.status(200).json({
             items: artists,
           });
-        }).catch(err => {
-          res.status(500).json(internal_server_error);
-          console.error(err);
+        }).catch(error => {
+          let err = new Error('Internal Server Error');
+          err.status = 500;
+          next(err);
+          console.error(error);
         });
         break;
       }
@@ -30,9 +32,11 @@ exports.get = (req, res) => {
           res.status(200).json({
             items: albums,
           });
-        }).catch(err => {
-          res.status(500).json(internal_server_error);
-          console.error(err);
+        }).catch(error => {
+          let err = new Error('Internal Server Error');
+          err.status = 500;
+          next(err);
+          console.error(error);
         });
         break;
       }
@@ -41,8 +45,11 @@ exports.get = (req, res) => {
           res.status(200).json({
             items: tracks,
           });
-        }).catch(err => {
-          res.status(500).json(internal_server_error);
+        }).catch(error => {
+          let err = new Error('Internal Server Error');
+          err.status = 500;
+          next(err);
+          console.error(error);
         });
         break;
       }
@@ -55,11 +62,13 @@ exports.get = (req, res) => {
                 albums: albums,
                 tracks: tracks,
               });
-            }).catch(err => { throw err });
-          }).catch(err => { throw err });
-        }).catch(err => {
-          res.status(500).json(internal_server_error);
-          console.error(err);
+            }).catch(error => { throw error });
+          }).catch(error => { throw error });
+        }).catch(error => {
+          let err = new Error('Internal Server Error');
+          err.status = 500;
+          next(err);
+          console.error(error);
         });
         break;
       }

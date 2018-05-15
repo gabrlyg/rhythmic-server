@@ -34,7 +34,7 @@ const internal_server_error = {
 }
 
 // POST /register
-exports.register = (req, res) => {
+exports.register = (req, res, next) => {
   User.create({
     username: req.body.username,
     email: req.body.email,
@@ -47,14 +47,16 @@ exports.register = (req, res) => {
       email: req.body.email,
       token: result.token,
     });
-  }).catch((err) => {
-    res.status(500).json(internal_server_error);
-    console.error(err);
+  }).catch((error) => {
+    let err = new Error('Internal Server Error');
+    err.status = 500;
+    next(err);
+    console.error(error);
   });
 }
 
 // POST /login
-exports.login = (req, res) => {
+exports.login = (req, res, next) => {
   const info = {
     password: req.body.password,
   }
@@ -64,11 +66,15 @@ exports.login = (req, res) => {
     info.email = req.body.email;
   }
   if (!info.username && !info.email) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     User.read(info).then(user => {
       if (!user) {
-        res.status(401).json(incorrect_credentials);
+        let err = new Error('Not Authorized');
+        err.status = 401;
+        next(err);
       } else {
         return auth.authorize(user._id);
       }
@@ -80,25 +86,35 @@ exports.login = (req, res) => {
           token: result.token,
         });
       }
-    }).catch(err => {
-      res.status(500).json(internal_server_error);
-      console.error(err);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.error(error);
     });
   }
 }
 
 // DELETE /signout
-exports.signOut = (req, res) => {
+exports.signOut = (req, res, next) => {
   if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorizaiton[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else if (!authorization[1]) {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else if (!req.body.token) {
-      res.status(400).json(bad_request);
+      let err = new Error('Bad Request');
+      err.status = 400;
+      next(err);
     } else {
       auth.delete(req.body.token).then(result => {
         if (!result) {
@@ -106,16 +122,18 @@ exports.signOut = (req, res) => {
             message: 'Signed out',
           });
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
 // GET /u/available
-exports.available = (req, res) => {
+exports.available = (req, res, next) => {
   if (req.body.email) {
     const email = req.body.email;
     User.read({ email: email }).then(user => {
@@ -123,8 +141,11 @@ exports.available = (req, res) => {
         status: 200,
         message: user === null ? 'Email available' : 'Email alreday exists!',
       });
-    }).catch(err => {
-      res.status(500).json(internal_server_error);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.log(error);
     });
   } else if (req.body.username) {
     const username = req.body.username;
@@ -133,19 +154,26 @@ exports.available = (req, res) => {
         status: 200,
         message: username + (user === null ? ' is available' : ' is already taken'),
       });
-    }).catch((err) => {
-      res.status(500).json(internal_server_error);
+    }).catch((error) => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.log(error);
     });
   } else {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   }
 }
 
 // GET /u/:username
-exports.getProfile = (req, res) => {
+exports.getProfile = (req, res, next) => {
   const username = req.params.username;
   if (!username) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     User.read({ username: username }).then((user) => {
       if (user) {
@@ -154,60 +182,81 @@ exports.getProfile = (req, res) => {
           email: user.email,
         });
       } else {
-        res.status(404).json(user_not_found);
+        let err = new Error('User not found');
+        err.status = 404;
+        next(err);
       }
-    }).catch((err) => {
-      res.status(500).json(internal_server_error);
+    }).catch((error) => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.log(error);
     });
   }
 }
 
 // PATCH /u/:username
-exports.updateProfile = (req, res) => {
+exports.updateProfile = (req, res, next) => {
   const username = req.params.username;
   if (!username) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     if (!req.headers.authorization) {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const authorization = req.headers.authorization.split(' ');
       if (authorization[0] === 'Bearer') {
         const token = authorization[1];
         auth.authenticate(token).then((result) => {
           if (!result) {
-            res.status(401).json(token_expired);
+            let err = new Error('Token Expired');
+            err.status = 401;
+            next(err);
           } else {
             return User.update({ username: username }, req.body);
           }
         }).then(user => {
           if (user !== undefined) {
             if (!user) {
-              res.status(404).json(user_not_found);
+              let err = new Error('User not found');
+              err.status = 404;
+              next(err);
             } else {
               res.status(201).json(user); // 可能有bug
             }
           }
-        }).catch((err) => {
-          res.status(500).json(internal_server_error);
-          console.error(err);
+        }).catch((error) => {
+          let err = new Error('Internal Server Error');
+          err.status = 500;
+          next(err);
+          console.error(error);
         });
       } else {
-        res.status(401).json(not_authorized);
+        let err = new Error('Not Authorized');
+        err.status = 401;
+        next(err);
       }
     }
   }
 }
 
 // GET /u/:username/playlists
-exports.getPlaylists = (req, res) => {
+exports.getPlaylists = (req, res, next) => {
   const username = req.params.username;
   if (!username) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     User.read({ username: username }).then(user => {
       if (!user) {
-        res.status(404).json(user_not_found);
+        let err = new Error('User not found');
+        err.status = 404;
+        next(err);
       } else {
         return Playlist.readManyByOwner(user._id);
       }
@@ -217,22 +266,28 @@ exports.getPlaylists = (req, res) => {
           items: playlists,
         });
       }
-    }).catch(err => {
-      res.status(500).json(internal_server_error);
-      console.error(err);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.error(error);
     });
   }
 }
 
 // GET /u/:username/artists
-exports.getArtists = (req, res) => {
+exports.getArtists = (req, res, next) => {
   const username = req.params.username;
   if (!username) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     User.getArtists(username).then(user => {
       if (!user) {
-        res.status(404).json(user_not_found);
+        let err = new Error('User not found');
+        err.status = 404;
+        next(err);
       } else {
         return Artist.readManyById(user.artists);
       }
@@ -242,22 +297,28 @@ exports.getArtists = (req, res) => {
           items: artists,
         });
       }
-    }).catch(err => {
-      res.status(500).json(internal_server_error);
-      console.error(err);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.error(error);
     });
   }
 }
 
 // GET /u/:username/albums
-exports.getAlbums = (req, res) => {
+exports.getAlbums = (req, res, next) => {
   const username = req.params.username;
   if (!username) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     User.getAlbums(username).then(user => {
       if (!user) {
-        res.status(404).json(user_not_found);
+        let err = new Error('User not found');
+        err.status = 404;
+        next(err);
       } else {
         return Album.readManyById(user.albums);
       }
@@ -267,22 +328,28 @@ exports.getAlbums = (req, res) => {
           items: albums,
         });
       }
-    }).catch(err => {
-      res.status(500).json(internal_server_error);
-      console.error(err);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.error(error);
     });
   }
 }
 
 // GET /u/:username/tracks
-exports.getTracks = (req, res) => {
+exports.getTracks = (req, res, next) => {
   const username = req.params.username;
   if (!username) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else {
     User.getTracks(username).then(user => {
       if (!user) {
-        res.status(404).json(user_not_found);
+        let err = new Error('User not found');
+        err.status = 404;
+        next(err);
       } else {
         return Track.readManyById(user.tracks);
       }
@@ -292,29 +359,39 @@ exports.getTracks = (req, res) => {
           items: tracks,
         });
       }
-    }).catch(err => {
-      res.status(500).json(internal_server_error);
-      console.error(err);
+    }).catch(error => {
+      let err = new Error('Internal Server Error');
+      err.status = 500;
+      next(err);
+      console.error(error);
     });
   }
 }
 
 // POST /me/artists/:id
-exports.addToArtists = (req, res) => {
+exports.addToArtists = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return User.addToArtists(result.user_id, id);
         }
@@ -322,30 +399,40 @@ exports.addToArtists = (req, res) => {
         if (user !== undefined) {
           res.status(201).json(user);
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 401;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
 // POST /me/albums/:id
-exports.addToAlbums = (req, res) => {
+exports.addToAlbums = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return User.addToAlbums(result.user_id, id);
         }
@@ -353,30 +440,40 @@ exports.addToAlbums = (req, res) => {
         if (user !== undefined) {
           res.status(201).json(user);
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
 // POST /me/tracks/:id
-exports.addToTracks = (req, res) => {
+exports.addToTracks = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return User.addToTracks(result.user_id, id);
         }
@@ -384,30 +481,40 @@ exports.addToTracks = (req, res) => {
         if (user !== undefined) {
           res.status(201).json(user);
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
 // DELETE /me/artists/:id
-exports.deleteFromArtists = (req, res) => {
+exports.deleteFromArtists = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return User.deleteFromArtists(result.user_id, id);
         }
@@ -415,30 +522,40 @@ exports.deleteFromArtists = (req, res) => {
         if (user !== undefined) {
           res.status(204).json(user);
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
 // DELETE /me/albums/:id
-exports.deleteFromAlbums = (req, res) => {
+exports.deleteFromAlbums = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return User.deleteFromAlbums(result.user_id, id);
         }
@@ -446,30 +563,40 @@ exports.deleteFromAlbums = (req, res) => {
         if (user !== undefined) {
           res.status(204).json(user);
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
 }
 
 // DELETE /me/tracks/:id
-exports.deleteFromTracks = (req, res) => {
+exports.deleteFromTracks = (req, res, next) => {
   const id = req.params.id;
   if (!id) {
-    res.status(400).json(bad_request);
+    let err = new Error('Bad Request');
+    err.status = 400;
+    next(err);
   } else if (!req.headers.authorization) {
-    res.status(401).json(not_authorized);
+    let err = new Error('Not Authorized');
+    err.status = 401;
+    next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
     if (authorization[0] !== 'Bearer') {
-      res.status(401).json(not_authorized);
+      let err = new Error('Not Authorized');
+      err.status = 401;
+      next(err);
     } else {
       const token = authorization[1];
       auth.authenticate(token).then(result => {
         if (!result) {
-          res.status(401).json(token_expired);
+          let err = new Error('Token Expired');
+          err.status = 401;
+          next(err);
         } else {
           return User.deleteFromTracks(result.user_id, id);
         }
@@ -477,9 +604,11 @@ exports.deleteFromTracks = (req, res) => {
         if (user !== undefined) {
           res.status(204).json(user);
         }
-      }).catch(err => {
-        res.status(500).json(internal_server_error);
-        console.error(err);
+      }).catch(error => {
+        let err = new Error('Internal Server Error');
+        err.status = 500;
+        next(err);
+        console.error(error);
       });
     }
   }
