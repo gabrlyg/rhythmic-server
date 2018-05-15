@@ -9,13 +9,14 @@ db.on('disconnected', console.log.bind(console, 'MongoDB disconnected'));
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 const linkin_park = {
-  id: '5af99eaa6889ed335810dc07',
+  // id: '5af99eaa6889ed335810dc07', // desktop
+  id: '5afa76fc6ef5b30bb8ac3b80',
   name: 'Linkin Park',
 }
 const meteora = {
   album: {
-    id: '5af9a17e3ca8cf06908177b3',
-    // id: '5af1033c1ef1861a30417d82', // laptop
+    // id: '5af9a17e3ca8cf06908177b3', // desktop
+    id: '5afa77a81a56492308712c4f', // laptop
     name: 'Meteora',
   },
   genres: [
@@ -147,12 +148,21 @@ const tracks = [{
   lyrics: '/lyrics/linkin_park/meteora/numb.lrc',
 }];
 
+let cnt = 0;
+const count = () => {
+  cnt++;
+  if (cnt === tracks.length) {
+    console.log('Finished!');
+  }
+}
 for (let item of tracks) {
   Track.create(item).then(result => {
     if (result) {
       console.log('Success: ' + item.name);
+      count();
     }
   }).catch(err => {
     console.error('Failed: ' + item.name);
+    count();
   });
 }

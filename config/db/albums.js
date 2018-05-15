@@ -9,15 +9,18 @@ db.on('disconnected', console.log.bind(console, 'MongoDB disconnected'));
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 const linkin_park = {
-  id: '5af99eaa6889ed335810dc07',
+  // id: '5af99eaa6889ed335810dc07', // desktop
+  id: '5afa76fc6ef5b30bb8ac3b80', // laptop
   name: 'Linkin Park',
 }
 const muse = {
-  id: '5af99eaa6889ed335810dc08',
+  // id: '5af99eaa6889ed335810dc08', // desktop
+  id: '5afa76fc6ef5b30bb8ac3b81', // laptop
   name: 'Muse',
 }
 const green_day = {
-  id: '5af99eaa6889ed335810dc09',
+  // id: '5af99eaa6889ed335810dc09', // desktop
+  id: '5afa76fc6ef5b30bb8ac3b82', // laptop
   name: 'Green Day',
 }
 
@@ -260,12 +263,22 @@ const albums = [{
   release_date: new Date('2016-10-07'),
 }];
 
+let cnt = 0;
+const count = () => {
+  cnt++;
+  if (cnt === albums.length) {
+    console.log('Finished!');
+  }
+}
+
 for (let item of albums) {
   Album.create(item).then(result => {
     if (result) {
       console.log('Success: ' + item.name);
     }
+    count();
   }).catch(err => {
     console.error(err);
+    count();
   });
 }

@@ -9,13 +9,14 @@ db.on('disconnected', console.log.bind(console, 'MongoDB disconnected'));
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 const linkin_park = {
-  id: '5af99eaa6889ed335810dc07',
+  // id: '5af99eaa6889ed335810dc07', // desktop
+  id: '5afa76fc6ef5b30bb8ac3b80', // laptop
   name: 'Linkin Park',
 }
 const hybrid_theory = {
   album: {
-    id: '5af9a17e3ca8cf06908177b1',
-    // id: '5af1033c1ef1861a30417d80', // laptop
+    // id: '5af9a17e3ca8cf06908177b1', // desktop
+    id: '5afa77a81a56492308712c4d', // laptop
     name: 'Hybrid Theory',
   },
   genres: [
@@ -165,8 +166,8 @@ const tracks = [{
   lyrics: '/lyrics/linkin_park/hybrid_theory/papercut_recorded_live_at_bbc1.lrc',
 }];
 
+let cnt = 0;
 const count = () => {
-  let cnt = 0;
   cnt++;
   if (cnt === tracks.length) {
     console.log('Finished!');

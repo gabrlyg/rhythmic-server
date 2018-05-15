@@ -42,12 +42,22 @@ const artists = [{
   ],
 }];
 
+let cnt = 0;
+const count = () => {
+  cnt++;
+  if (cnt === artists.length) {
+    console.log('Finished!');
+  }
+}
+
 for (let a of artists) {
   Artist.create(a).then(result => {
     if (result) {
       console.log('Success: ' + a.name);
+      count();
     } else {
       console.error('Failed: ' + a.name);
+      count();
     }
   });
 }

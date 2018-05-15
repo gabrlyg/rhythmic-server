@@ -9,13 +9,14 @@ db.on('disconnected', console.log.bind(console, 'MongoDB disconnected'));
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 const linkin_park = {
-  id: '5af99eaa6889ed335810dc07',
+  // id: '5af99eaa6889ed335810dc07', // desktop
+  id: '5afa76fc6ef5b30bb8ac3b80', // laptop
   name: 'Linkin Park',
 }
 const minutes_to_midnight = {
   album: {
-    id: '5af9a17e3ca8cf06908177b5',
-    // id: '5af1033c1ef1861a30417d84', // laptop
+    // id: '5af9a17e3ca8cf06908177b5', // desktop
+    id: '5afa77a81a56492308712c51', // laptop
     name: 'Minutes To Midnight',
   },
   genres: [
