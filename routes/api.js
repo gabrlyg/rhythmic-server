@@ -34,7 +34,7 @@ router.delete('/playlist/:id/track/:track_id', playlistController.remove);
 // Get user profile
 router.get('/u/:username', userController.getProfile);
 
-// Update user profile
+// Update user profile, requires authroization
 router.patch('/u/:username', userController.updateProfile);
 
 // Get a user's playlists
