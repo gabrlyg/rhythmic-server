@@ -5,34 +5,6 @@ const Artist = require('../models/Artist');
 const Playlist = require('../models/Playlist');
 const auth = require('../lib/auth');
 
-const bad_request = {
-  error: 'Bad Request',
-}
-const not_authorized = {
-  error: 'Not authorized',
-}
-const token_expired = {
-  error: 'Token expired',
-}
-const incorrect_credentials = {
-  error: 'The username/email or password is incorrect',
-}
-const user_not_found = {
-  error: 'User not found',
-}
-const artist_not_found = {
-  error: 'Artist doesn\'t exist',
-}
-const album_not_found = {
-  error: 'Album doesn\'t exist',
-}
-const track_not_found = {
-  error: 'Track doesn\'t exist',
-}
-const internal_server_error = {
-  error: 'Internal Server Error',
-}
-
 // POST /register
 exports.register = (req, res, next) => {
   User.create({
@@ -50,8 +22,8 @@ exports.register = (req, res, next) => {
   }).catch((error) => {
     let err = new Error('Internal Server Error');
     err.status = 500;
-    next(err);
     console.error(error);
+    next(err);
   });
 }
 

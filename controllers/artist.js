@@ -17,7 +17,7 @@ exports.get = (req, res, next) => {
         Album.readByArtist(artist.name).then(albums => {
           if (albums !== undefined) {
             res.status(200).json({
-              ...artist,
+              ...artist._doc,
               albums: albums,
             });
           }

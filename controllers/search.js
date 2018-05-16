@@ -12,8 +12,8 @@ exports.get = (req, res, next) => {
     err.status = 400;
     next(err);
   } else {
-    const keywords = new RegExp(keywords);
-    switch (req.query.categories) {
+    const keywords = new RegExp(req.query.keywords);
+    switch (req.query.type) {
       case 'artists': {
         Artist.search(keywords).then(artists => {
           res.status(200).json({
