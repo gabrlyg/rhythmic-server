@@ -64,7 +64,7 @@ exports.getArtists = (username) => {
 }
 
 exports.addToArtists = (id, artist_id) => {
-  return User.findByIdAndUpdate(id, { '$push': { artists: artist_id } }, { new: true }).exec();
+  return User.findByIdAndUpdate(id, { '$push': { artists: artist_id } }, { new: true }).select('artists -_id').exec();
 }
 
 exports.deleteFromArtists = (id, artist_id) => {
@@ -76,7 +76,7 @@ exports.getAlbums = (username) => {
 }
 
 exports.addToAlbums = (id, album_id) => {
-  return User.findByIdAndUpdate(id, { '$push': { albums: album_id } }, { new: true }).exec();
+  return User.findByIdAndUpdate(id, { '$push': { albums: album_id } }, { new: true }).select('albums').exec();
 }
 
 exports.deleteFromAlbums = (id, album_id) => {
@@ -88,7 +88,7 @@ exports.getTracks = (username) => {
 }
 
 exports.addToTracks = (id, track_id) => {
-  return User.findByIdAndUpdate(id, { '$push': { tracks: track_id } }, { new: true }).exec();
+  return User.findByIdAndUpdate(id, { '$push': { tracks: track_id } }, { new: true }).select('tracks').exec();
 }
 
 exports.deleteFromTracks = (id, track_id) => {
