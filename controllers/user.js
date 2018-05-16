@@ -48,15 +48,13 @@ exports.login = (req, res, next) => {
         err.status = 401;
         next(err);
       } else {
-        return auth.authorize(user._id);
-      }
-    }).then(result => {
-      if (result !== undefined) {
-        res.status(200).json({
-          username: user.username,
-          email: user.email,
-          token: result.token,
-        });
+        auth.authorize(user._id).then(result => {
+          res.status(200).json({
+            username: user.username,
+            email: user.email,
+            token: result.token,
+          });
+        }).catch(err => { throw err });
       }
     }).catch(error => {
       let err = new Error('Internal Server Error');
@@ -75,7 +73,7 @@ exports.signOut = (req, res, next) => {
     next(err);
   } else {
     const authorization = req.headers.authorization.split(' ');
-    if (authorizaiton[0] !== 'Bearer') {
+    if (authorization[0] !== 'Bearer') {
       let err = new Error('Not Authorized');
       err.status = 401;
       next(err);
@@ -83,22 +81,24 @@ exports.signOut = (req, res, next) => {
       let err = new Error('Not Authorized');
       err.status = 401;
       next(err);
-    } else if (!req.body.token) {
-      let err = new Error('Bad Request');
-      err.status = 400;
-      next(err);
     } else {
-      auth.delete(req.body.token).then(result => {
+      auth.authenticate(authorization[1]).then(result => {
         if (!result) {
-          res.status(204).json({
-            message: 'Signed out',
-          });
+          let err = new Error('Not Authorized');
+          err.status = 401;
+          next(err);
+        } else {
+          return auth.delete(authorization[1]);
+        }
+      }).then(result => {
+        if (result !== undefined) {
+          res.status(204);
         }
       }).catch(error => {
         let err = new Error('Internal Server Error');
         err.status = 500;
-        next(err);
         console.error(error);
+        next(err);
       });
     }
   }
