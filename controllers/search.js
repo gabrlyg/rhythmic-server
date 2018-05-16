@@ -12,7 +12,7 @@ exports.get = (req, res, next) => {
     err.status = 400;
     next(err);
   } else {
-    const keywords = new RegExp(req.query.keywords);
+    const keywords = new RegExp(req.query.keywords, 'i');
     switch (req.query.type) {
       case 'artists': {
         Artist.search(keywords).then(artists => {
