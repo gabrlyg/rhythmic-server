@@ -14,28 +14,28 @@ exports.create = (artstInfo) => {
 
 exports.update = (id, update) => {
   if (mongoose.Types.ObjectId.isValid(id)) {
-    return Artist.findByIdAndUpdate(id, update, { new: true }).exec();
+    return Artist.findByIdAndUpdate(id, update, { new: true }).select('-__v').exec();
   }
   return Promise.resolve(null);
 }
 
 exports.readById = (id) => {
   if (mongoose.Types.ObjectId.isValid(id)) {
-    return Artist.findById(id).exec();
+    return Artist.findById(id).select('-__v').exec();
   }
   return Promise.resolve(null);
 }
 
 exports.readOneByName = (name) => {
-  return Artist.findOne({ name: name }).exec();
+  return Artist.findOne({ name: name }).select('-__v').exec();
 }
 
 exports.readManyById = (ids) => {
-  return Artist.find().where('_id').in(ids).exec();
+  return Artist.find().where('_id').in(ids).select('-__v').exec();
 }
 
 exports.search = (keywords) => {
-  return Artist.find({ name: keywords}).exec();
+  return Artist.find({ name: keywords}).select('-__v').exec();
 }
 
 exports.delete = (id) => {
